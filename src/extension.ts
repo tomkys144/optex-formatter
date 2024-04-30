@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
       let sec = false;
       let secc = false;
       let math = false;
-      let cmd = false;
+      let bracket = 0;
 
       let indent_symbol = " ".repeat(4);
       let edit: vscode.TextEdit[] = [];
@@ -25,108 +25,101 @@ export function activate(context: vscode.ExtensionContext) {
         if (line.isEmptyOrWhitespace) {
           continue;
         }
-        const command = /\\[a-zA-Z]*/.exec(line.text);
 
-        if (cmd && line.text.trim() == "}") {
-          indent -= 1;
-          cmd = false;
-          edit.push(
-            vscode.TextEdit.replace(
-              line.range,
-              indent_symbol.repeat(indent) + line.text.trimStart()
-            )
-          );
-        }
+        let txt = line.text.trim();
 
-        if (!command) {
-          edit.push(
-            vscode.TextEdit.replace(
-              line.range,
-              indent_symbol.repeat(indent) + line.text.trimStart()
-            )
-          );
-          continue;
-        }
+        const command = /\\[a-zA-Z]*/.exec(txt);
 
-        switch (command[0]) {
-          case "\\app":
-          case "\\bibchap":
-          case "\\chap":
-            indent = 0;
-            edit.push(setIndent(line, indent, indent_symbol));
-            sec = false;
-            secc = false;
-            indent = 1;
-            break;
+        if (command) {
+          switch (command[0]) {
+            case "\\app":
+            case "\\bibchap":
+            case "\\chap":
+              indent = 0;
+              edit.push(setIndent(line, indent, indent_symbol));
+              sec = false;
+              secc = false;
+              indent = 1;
+              break;
 
-          case "\\sec":
-            if (sec) {
-              indent -= 1;
-            }
-            if (secc) {
-              indent -= 1;
-            }
-            edit.push(setIndent(line, indent, indent_symbol));
-            indent += 1;
-            sec = true;
-            secc = false;
-            break;
-
-          case "\\secc":
-            if (secc) {
-              indent -= 1;
-            }
-            edit.push(setIndent(line, indent, indent_symbol));
-            indent += 1;
-            secc = true;
-            break;
-
-          case "$$":
-            if (math) {
-              indent -= 1;
-            }
-            edit.push(setIndent(line, indent, indent_symbol));
-
-            if (!math) {
+            case "\\sec":
+              if (sec) {
+                indent -= 1;
+              }
+              if (secc) {
+                indent -= 1;
+              }
+              edit.push(setIndent(line, indent, indent_symbol));
               indent += 1;
-              math = true;
-            } else {
-              math = false;
-            }
-            break;
+              sec = true;
+              secc = false;
+              break;
 
-          case "\\midinsert":
-            edit.push(setIndent(line, indent, indent_symbol));
-            indent += 1;
-            break;
+            case "\\secc":
+              if (secc) {
+                indent -= 1;
+              }
+              edit.push(setIndent(line, indent, indent_symbol));
+              indent += 1;
+              secc = true;
+              break;
 
-          case "\\endinsert":
-            indent -= 1;
-            edit.push(setIndent(line, indent, indent_symbol));
-            break;
+            case "\\midinsert":
+              edit.push(setIndent(line, indent, indent_symbol));
+              indent += 1;
+              break;
 
-          case "\\specification":
-          case "\\abstractCZ":
-          case "\\abstractEN":
-          case "\\thanks":
-          case "\\declaration":
-          case "\\ctable":
-            edit.push(setIndent(line, indent, indent_symbol));
-            indent += 1;
-            cmd = true;
-            break;
-
-          case "\\caption":
-            if (cmd) {
+            case "\\endinsert":
               indent -= 1;
-            }
+              edit.push(setIndent(line, indent, indent_symbol));
+              break;
 
-            edit.push(setIndent(line, indent, indent_symbol));
-            break;
+            default:
+              edit.push(setIndent(line, indent, indent_symbol));
+          }
+        } else if (txt != "}") {
+          edit.push(setIndent(line, indent, indent_symbol));
+        }
 
-          default:
+        if (txt == "$$") {
+          if (math) {
+            indent -= 1;
+          }
+
+          edit.push(setIndent(line, indent, indent_symbol));
+
+          if (!math) {
+            indent += 1;
+            math = true;
+          } else {
+            math = false;
+          }
+        }
+
+        if (txt.includes("{")) {
+          let num = txt.replace(/[^{]/g, "").length;
+
+          bracket += num;
+          indent += num;
+        }
+
+        if (txt.includes("}")) {
+          let num = txt.replace(/[^}]/g, "").length;
+
+          bracket -= num;
+          indent -= num;
+
+          if (indent < 0) {
+            indent = 0;
+          }
+
+          if (bracket < 0) {
+            indent = 0;
+          }
+
+          if (txt == "}") {
             edit.push(setIndent(line, indent, indent_symbol));
-            break;
+          }
         }
       }
 
