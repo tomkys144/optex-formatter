@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
       let sec = false;
       let secc = false;
       let math = false;
-      let table = false;
+      let cmd = false;
 
       let indent_symbol = " ".repeat(4);
       let edit: vscode.TextEdit[] = [];
@@ -27,9 +27,9 @@ export function activate(context: vscode.ExtensionContext) {
         }
         const command = /\\[a-zA-Z]*/.exec(line.text);
 
-        if (table && line.text.trim() == "}") {
+        if (cmd && line.text.trim() == "}") {
           indent -= 1;
-          table = false;
+          cmd = false;
           edit.push(
             vscode.TextEdit.replace(
               line.range,
@@ -49,6 +49,8 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         switch (command[0]) {
+          case "\\app":
+          case "\\bibchap":
           case "\\chap":
             indent = 0;
             edit.push(setIndent(line, indent, indent_symbol));
@@ -103,14 +105,19 @@ export function activate(context: vscode.ExtensionContext) {
             edit.push(setIndent(line, indent, indent_symbol));
             break;
 
+          case "\\specification":
+          case "\\abstractCZ":
+          case "\\abstractEN":
+          case "\\thanks":
+          case "\\declaration":
           case "\\ctable":
             edit.push(setIndent(line, indent, indent_symbol));
             indent += 1;
-            table = true;
+            cmd = true;
             break;
 
           case "\\caption":
-            if (table) {
+            if (cmd) {
               indent -= 1;
             }
 
