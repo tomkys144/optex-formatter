@@ -1,9 +1,9 @@
 {
   "name": "optex-formatter",
-  "displayName": "optex-formatter",
+  "displayName": "OpTeX Formatter",
   "publisher": "tomkys144",
   "description": "Simple optex formatter",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/tomkys144/optex-formatter.git"
@@ -20,14 +20,30 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-    ],
     "languages": [
       {
         "id": "optex",
         "extensions": [
           ".tex"
         ]
+      }
+    ],
+    "configuration": [
+      {
+        "title": "OpTeX Formatter",
+        "properties": {
+          "optex-formatter.indentStyle": {
+            "description": "Switch between spaces and tabs indent style",
+            "type": "string",
+            "enum": ["space", "tab"],
+            "default": "space"
+          },
+          "optex-formatter.indentWidth": {
+            "description": "Number of spaces per indent level",
+            "type": "integer",
+            "default": 4
+          }
+        }
       }
     ]
   },

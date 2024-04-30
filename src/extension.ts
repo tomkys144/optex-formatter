@@ -12,13 +12,25 @@ export function activate(context: vscode.ExtensionContext) {
       if (document.languageId != "optex") {
         return <vscode.TextEdit[]>[];
       }
+      const settings = vscode.workspace.getConfiguration("optex-formatter");
+
       let indent = 0;
       let sec = false;
       let secc = false;
       let math = false;
       let bracket = 0;
+      var indent_symbol = "";
+      if (settings.get("indentStyle") == "space") {
+        let width = settings.get("indentWidth");
+        if (typeof width == "number") {
+          indent_symbol = " ".repeat(width);
+        } else {
+          indent_symbol = " ".repeat(4);
+        }
+      } else {
+        indent_symbol = "\t";
+      }
 
-      let indent_symbol = " ".repeat(4);
       let edit: vscode.TextEdit[] = [];
       for (let i = 0; i < document.lineCount; i++) {
         const line = document.lineAt(i);
