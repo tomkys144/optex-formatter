@@ -88,9 +88,15 @@ function headers(document: vscode.TextDocument): vscode.TextEdit[] {
           let n = 1;
           while (document.lineAt(i + n).isEmptyOrWhitespace) {
             if (
-              !["\\chap", "\\sec", "\\secc", "\\midinsert", "$$"].some((v) =>
-                document.lineAt(i + n + 1).text.includes(v)
-              )
+              ![
+                "\\chap",
+                "\\sec",
+                "\\secc",
+                "\\midinsert",
+                "\\bibchap",
+                "\\app",
+                "$$",
+              ].some((v) => document.lineAt(i + n + 1).text.includes(v))
             ) {
               edits.push(
                 vscode.TextEdit.delete(
@@ -112,6 +118,8 @@ function headers(document: vscode.TextDocument): vscode.TextEdit[] {
       case "\\sec":
       case "\\secc":
       case "\\midinsert":
+      case "\\bibchap":
+      case "\\app":
         if (i != 0 && !document.lineAt(i - 1).isEmptyOrWhitespace) {
           edits.push(
             vscode.TextEdit.insert(document.lineAt(i).range.start, getEOL())
@@ -121,9 +129,15 @@ function headers(document: vscode.TextDocument): vscode.TextEdit[] {
         let n = 1;
         while (document.lineAt(i + n).isEmptyOrWhitespace) {
           if (
-            !["\\chap", "\\sec", "\\secc", "\\midinsert", "$$"].some((v) =>
-              document.lineAt(i + n + 1).text.includes(v)
-            )
+            ![
+              "\\chap",
+              "\\sec",
+              "\\secc",
+              "\\midinsert",
+              "\\bibchap",
+              "\\app",
+              "$$",
+            ].some((v) => document.lineAt(i + n + 1).text.includes(v))
           ) {
             edits.push(
               vscode.TextEdit.delete(
