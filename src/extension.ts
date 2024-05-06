@@ -3,6 +3,7 @@
 import * as vscode from "vscode";
 import { indent } from "./indent";
 import { checkLines } from "./lines";
+import { formatSpaces } from "./spaces";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -33,6 +34,8 @@ export function activate(context: vscode.ExtensionContext) {
       edits = edits.concat(indent(indent_symbol, document));
 
       edits = edits.concat(checkLines(document))
+
+      edits = edits.concat(formatSpaces(document))
 
       return edits;
     },
