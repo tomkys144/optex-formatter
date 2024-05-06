@@ -86,8 +86,12 @@ function headers(document: vscode.TextDocument): vscode.TextEdit[] {
           }
 
           let n = 1;
-          while (document.lineAt(i + n).isEmptyOrWhitespace) {
+          while (
+            document.lineAt(i + n).isEmptyOrWhitespace &&
+            i + n < document.lineCount - 1
+          ) {
             if (
+              i + n + 1 >= document.lineCount ||
               ![
                 "\\chap",
                 "\\sec",
@@ -127,8 +131,12 @@ function headers(document: vscode.TextDocument): vscode.TextEdit[] {
         }
 
         let n = 1;
-        while (document.lineAt(i + n).isEmptyOrWhitespace) {
+        while (
+          document.lineAt(i + n).isEmptyOrWhitespace &&
+          i + n < document.lineCount - 1
+        ) {
           if (
+            i + n + 1 >= document.lineCount ||
             ![
               "\\chap",
               "\\sec",
