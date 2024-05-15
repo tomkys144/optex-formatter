@@ -55,6 +55,7 @@ export function indent(
           secc = true;
           break;
 
+        case "\\topinsert":
         case "\\midinsert":
           edit.push(setIndent(line, indent, indent_symbol));
           indent += 1;

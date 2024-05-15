@@ -9,22 +9,43 @@ export function formatSpaces(document: vscode.TextDocument): vscode.TextEdit[] {
 
 function removeMultispace(document: vscode.TextDocument): vscode.TextEdit[] {
   let edits = <vscode.TextEdit[]>[];
-
-  let pattern = /(?<=\S)\s{2,}/g
+  let pattern = /(?<=\S)\s{2,}/g;
+  let table = false;
 
   for (let i = 0; i < document.lineCount; i++) {
     let line = document.lineAt(i);
 
     let txt = line.text;
 
-    const spaces = pattern.exec(txt)
+    if (txt.includes("\\glos")) {
+      continue;
+    }
+
+    if (txt.includes("\\ctable")) {
+      table = true;
+      continue;
+    }
+
+    if (table) {
+      if (
+        txt.trim() == "}" ||
+        txt.includes("\\caption") ||
+        txt.includes("\\endinsert")
+      ) {
+        table = false;
+      } else {
+        continue;
+      }
+    }
+
+    const spaces = pattern.exec(txt);
 
     if (!spaces) {
-      continue
+      continue;
     }
-    const replacement = txt.replaceAll(pattern, ' ')
+    const replacement = txt.replaceAll(pattern, " ");
 
-    edits.push(vscode.TextEdit.replace(line.range, replacement))
+    edits.push(vscode.TextEdit.replace(line.range, replacement));
   }
 
   return edits;

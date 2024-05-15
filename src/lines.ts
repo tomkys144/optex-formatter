@@ -91,15 +91,17 @@ function headers(document: vscode.TextDocument): vscode.TextEdit[] {
             i + n < document.lineCount - 1
           ) {
             if (
-              i + n + 1 >= document.lineCount ||
+              i + n + 1 <= document.lineCount &&
               ![
                 "\\chap",
                 "\\sec",
                 "\\secc",
+                "\\topinsert",
                 "\\midinsert",
                 "\\bibchap",
                 "\\app",
                 "$$",
+                "\\label",
               ].some((v) => document.lineAt(i + n + 1).text.includes(v))
             ) {
               edits.push(
@@ -121,10 +123,16 @@ function headers(document: vscode.TextDocument): vscode.TextEdit[] {
       case "\\chap":
       case "\\sec":
       case "\\secc":
+      case "\\topinsert":
       case "\\midinsert":
       case "\\bibchap":
       case "\\app":
-        if (i != 0 && !document.lineAt(i - 1).isEmptyOrWhitespace) {
+      case "\\label":
+        if (
+          i != 0 &&
+          !document.lineAt(i - 1).isEmptyOrWhitespace &&
+          !document.lineAt(i - 1).text.includes("\\label")
+        ) {
           edits.push(
             vscode.TextEdit.insert(document.lineAt(i).range.start, getEOL())
           );
@@ -136,16 +144,19 @@ function headers(document: vscode.TextDocument): vscode.TextEdit[] {
           i + n < document.lineCount - 1
         ) {
           if (
-            i + n + 1 >= document.lineCount ||
-            ![
+            i + n + 1 <= document.lineCount &&
+            (![
               "\\chap",
               "\\sec",
               "\\secc",
+              "\\topinsert",
               "\\midinsert",
               "\\bibchap",
               "\\app",
               "$$",
-            ].some((v) => document.lineAt(i + n + 1).text.includes(v))
+              "\\label",
+            ].some((v) => document.lineAt(i + n + 1).text.includes(v)) ||
+              command[0] == "\\label")
           ) {
             edits.push(
               vscode.TextEdit.delete(
